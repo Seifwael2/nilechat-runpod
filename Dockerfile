@@ -8,14 +8,10 @@ ENV VLLM_ALLOW_LONG_MAX_MODEL_LEN=1
 ENV VLLM_ATTENTION_BACKEND=FLASH_ATTN
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-# Make sure both python3 and python commands work
 RUN python3 --version && \
     python3 -m pip --version && \
     ln -sf $(which python3) /usr/local/bin/python
 
-# Do NOT reinstall vLLM/torch/transformers here.
-# The base image already contains vLLM.
-# Only add what we need for Jupyter and downloader.
 RUN python3 -m pip install --no-cache-dir \
     --retries 20 \
     --timeout 120 \
@@ -35,4 +31,4 @@ EXPOSE 9001
 EXPOSE 8000
 EXPOSE 8888
 
-CMD ["/opt/nilechat/start_nilechat.sh"]
+ENTRYPOINT ["/opt/nilechat/start_nilechat.sh"]
