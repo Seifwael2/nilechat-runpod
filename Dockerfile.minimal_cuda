@@ -1,0 +1,24 @@
+FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+ENV VLLM_USE_V1=0
+ENV VLLM_ALLOW_LONG_MAX_MODEL_LEN=1
+ENV VLLM_ATTENTION_BACKEND=FLASH_ATTN
+ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+WORKDIR /workspace
+RUN apt-get update && apt-get install -y python3.11 python3.11-dev python3-pip git curl ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN python3.11 -m pip install --no-cache-dir --upgrade pip
+COPY requirements.lock.txt /tmp/requirements.lock.txt
+RUN python3.11 -m pip install --no-cache-dir --force-reinstall --index-url https://download.pytorch.org/whl/cu124 "torch==2.6.0+cu124" "torchvision==0.21.0+cu124" "torchaudio==2.6.0+cu124"
+RUN python3.11 -m pip install --no-cache-dir --force-reinstall -r /tmp/requirements.lock.txt --extra-index-url https://download.pytorch.org/whl/cu124
+COPY patch_nilechat_vllm.py /opt/nilechat/patch_nilechat_vllm.py
+COPY validate_nilechat_shards.py /opt/nilechat/validate_nilechat_shards.py
+COPY download_nilechat_atomic.py /opt/nilechat/download_nilechat_atomic.py
+COPY nilechat_payload_proxy.py /opt/nilechat/nilechat_payload_proxy.py
+COPY start_nilechat.sh /opt/nilechat/start_nilechat.sh
+COPY start_proxy.sh /opt/nilechat/start_proxy.sh
+RUN chmod +x /opt/nilechat/start_nilechat.sh /opt/nilechat/start_proxy.sh
+EXPOSE 9001
+EXPOSE 8000
+EXPOSE 8888
+CMD ["/opt/nilechat/start_nilechat.sh"]

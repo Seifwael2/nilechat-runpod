@@ -1,0 +1,13 @@
+vllm==0.8.5.post1
+transformers==4.51.3
+huggingface-hub==0.30.2
+tokenizers==0.21.4
+safetensors
+accelerate
+requests
+httpx
+fastapi
+uvicorn
+pydantic
+numpy<2.3
+jupyterlab
